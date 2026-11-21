@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PrepPro Dashboard</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #0f172a;
+      color: white;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      display: flex;
+      gap: 20px;
+    }
+
+    .left, .right {
+      flex: 1;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.05);
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      border: none;
+    }
+
+    button {
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    pre {
+      background: black;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 12px;
+      background: #1f2937;
+      border-radius: 10px;
+    }
+
+    .progress-bar {
+      height: 12px;
+      background: #22c55e;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>🔥 Coding Practice Dashboard</h2>
+
+<div class="container">
+
+  <!-- LEFT -->
+  <div class="left">
+
+    <div class="card">
+      <h3>Select Question</h3>
+      <select id="questionSelect" onchange="loadQuestion()">
+        <option value="sum">Sum</option>
+        <option value="subtract">Subtract</option>
+        <option value="multiply">Multiply</option>
+        <option value="divide">Divide</option>
+        <option value="square">Square</option>
+        <option value="cube">Cube</option>
+        <option value="even">Even Check</option>
+        <option value="max">Max</option>
+        <option value="min">Min</option>
+        <option value="reverse">Reverse String</option>
+        <option value="length">String Length</option>
+        <option value="palindrome">Palindrome</option>
+        <option value="factorial">Factorial</option>
+        <option value="sumArray">Sum Array</option>
+        <option value="maxArray">Max Array</option>
+        <option value="countVowels">Count Vowels</option>
+        <option value="uppercase">Uppercase</option>
+        <option value="lowercase">Lowercase</option>
+        <option value="power">Power</option>
+        <option value="abs">Absolute</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <h3>Question</h3>
+      <p id="questionText"></p>
+    </div>
+
+    <div class="card">
+      <h3>Test Results</h3>
+      <pre id="testResult"></pre>
+    </div>
+
+    <div class="card">
+      <h3>Progress</h3>
+      <div class="progress-bar-bg">
+        <div id="progressBar" class="progress-bar"></div>
+      </div>
+      <p id="progressText"></p>
+    </div>
+
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right">
+
+    <div class="card">
+      <h3>Code Editor</h3>
+
+      <!-- ✅ NEW INPUT BOX -->
+      <input id="customInput" placeholder="Enter input here (e.g. madam)">
+
+      <textarea id="code" rows="12">
+function solve(input) {
+  // write your logic
+}
+      </textarea>
+
+      <button onclick="runCode()">Run Code</button>
+      <button onclick="runTests()">Run Tests</button>
+      <button onclick="saveCode()">Save Code</button>
+<button onclick="loadCode()">Load Saved Code</button>
+<button onclick="clearCode()">Clear</button>
+<button onclick="copyCode()">Copy</button>
+<button onclick="fillSample()">Sample Input</button>
+
+      <pre id="output"></pre>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+// QUESTIONS
+const questions = {
+  sum:{text:"Sum two numbers. '2 3'→5",test:["2 3","10 20"],answer:[5,30]},
+  subtract:{text:"Subtract numbers. '5 3'→2",test:["5 3","10 4"],answer:[2,6]},
+  multiply:{text:"Multiply numbers. '2 3'→6",test:["2 3","4 5"],answer:[6,20]},
+  divide:{text:"Divide numbers. '10 2'→5",test:["10 2","20 4"],answer:[5,5]},
+  square:{text:"Square number. '4'→16",test:["4","5"],answer:[16,25]},
+  cube:{text:"Cube number. '3'→27",test:["3","2"],answer:[27,8]},
+  even:{text:"Check even. '4'→true",test:["4","5"],answer:[true,false]},
+  max:{text:"Max of two. '5 9'→9",test:["5 9","3 1"],answer:[9,3]},
+  min:{text:"Min of two. '5 9'→5",test:["5 9","3 1"],answer:[5,1]},
+  reverse:{text:"Reverse string. 'hello'→olleh",test:["hello","abc"],answer:["olleh","cba"]},
+  length:{text:"String length. 'hello'→5",test:["hello","abc"],answer:[5,3]},
+  palindrome:{text:"Palindrome check",test:["madam","hello"],answer:[true,false]},
+  factorial:{text:"Factorial. '5'→120",test:["5","3"],answer:[120,6]},
+  sumArray:{text:"Sum array '1 2 3'→6",test:["1 2 3","4 5"],answer:[6,9]},
+  maxArray:{text:"Max array",test:["1 5 3","2 9 1"],answer:[5,9]},
+  countVowels:{text:"Count vowels",test:["hello","aeiou"],answer:[2,5]},
+  uppercase:{text:"Uppercase",test:["abc","hello"],answer:["ABC","HELLO"]},
+  lowercase:{text:"Lowercase",test:["ABC","HELLO"],answer:["abc","hello"]},
+  power:{text:"Power '2 3'→8",test:["2 3","3 2"],answer:[8,9]},
+  abs:{text:"Absolute '-5'→5",test:["-5","10"],answer:[5,10]}
+};
+
+let solved = JSON.parse(localStorage.getItem("solved")) || {};
+
+function loadQuestion() {
+  const q = document.getElementById("questionSelect").value;
+  document.getElementById("questionText").innerText = questions[q].text;
+}
+loadQuestion();
+
+// ✅ UPDATED RUN CODE WITH INPUT
+function runCode() {
+  try {
+    let code = document.getElementById("code").value;
+    let input = document.getElementById("customInput").value;
+
+    eval(code);
+    let result = solve(input);
+
+    document.getElementById("output").innerText = result;
+
+  } catch(err){
+    document.getElementById("output").innerText = err;
+  }
+}
+
+// TEST CASES (UNCHANGED)
+function runTests() {
+  try {
+    let code = document.getElementById("code").value;
+    eval(code);
+
+    let q = document.getElementById("questionSelect").value;
+    let data = questions[q];
+
+    let result = "";
+    let passCount = 0;
+
+    data.test.forEach((input,i)=>{
+      let res = solve(input);
+      if(res == data.answer[i]){
+        result += "Test "+(i+1)+": PASS\\n";
+        passCount++;
+      } else {
+        result += "Test "+(i+1)+": FAIL (Got "+res+")\\n";
+      }
+    });
+
+    if(passCount === data.test.length){
+      solved[q] = true;
+      localStorage.setItem("solved", JSON.stringify(solved));
+    }
+
+    updateProgress();
+    document.getElementById("testResult").innerText = result;
+
+  } catch(err){
+    document.getElementById("testResult").innerText = err;
+  }
+}
+
+// PROGRESS
+function updateProgress(){
+  let total = Object.keys(questions).length;
+  let done = Object.keys(solved).length;
+  let percent = (done/total)*100;
+
+  document.getElementById("progressBar").style.width = percent + "%";
+  document.getElementById("progressText").innerText = done + "/" + total + " solved";
+}
+
+updateProgress();
+
+function saveCode() {
+  let code = document.getElementById("code").value;
+  localStorage.setItem("savedCode", code);
+}
+
+function loadCode() {
+  let code = localStorage.getItem("savedCode");
+  if(code) document.getElementById("code").value = code;
+}
+
+function clearCode() {
+  document.getElementById("code").value = "";
+}
+
+function copyCode() {
+  let code = document.getElementById("code").value;
+  navigator.clipboard.writeText(code);
+}
+
+function fillSample() {
+  let q = document.getElementById("questionSelect").value;
+  document.getElementById("customInput").value = questions[q].test[0];
+}
+
+document.getElementById("code").addEventListener("keydown", function(e) {
+  if (e.ctrlKey && e.key === "Enter") {
+    runCode();
+  }
+});
+
+</script>
+
+</body>
+</html>
