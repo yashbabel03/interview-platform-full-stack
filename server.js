@@ -10,19 +10,6 @@ if (!MONGODB_URI) {
   process.exit(1);
 }
 
-// CORS FIX
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Headers", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-
-  next();
-});
-
 app.use(express.json());
 
 // MongoDB connection
@@ -33,12 +20,14 @@ mongoose.connect(MONGODB_URI)
 // Routes
 app.use("/auth", require("./routes/auth"));
 
-// Test route
-app.get("/", (req, res) => {
-  res.send("Server is working");
+// Serve the website and API from one origin in local and hosted deployments.
+app.use(express.static(__dirname));
+
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });
