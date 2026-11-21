@@ -4,8 +4,11 @@
   "description": "Student interview preparation dashboard and coding practice app",
   "main": "server.js",
   "scripts": {
-    "start": "node --env-file=.env server.js",
-    "dev": "node --watch --env-file=.env server.js"
+    "start": "node --env-file-if-exists=.env server.js",
+    "dev": "node --watch --env-file-if-exists=.env server.js"
+  },
+  "engines": {
+    "node": ">=22.9.0"
   },
   "keywords": [
     "interview-preparation",
