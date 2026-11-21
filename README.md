@@ -37,11 +37,21 @@ Requirements: Node.js and a MongoDB instance.
    npm start
    ```
 
-5. Open `index.html` in a browser. The page currently calls the API at `http://localhost:3000`.
+5. Visit `http://localhost:3000` to use the website and API together.
+
+## Deploy as a live website
+
+The app is configured for Render as one Node web service: it serves the HTML pages and the `/auth` API from the same public URL. The included `render.yaml` creates the service configuration, but you must provide a MongoDB connection string as the `MONGODB_URI` secret during setup.
+
+1. Sign in to Render and choose **New > Blueprint**.
+2. Connect this GitHub repository. Render reads `render.yaml` and asks for `MONGODB_URI`; enter the connection string for a MongoDB database you control. Keep it private and do not put it in GitHub.
+3. Create the Blueprint and wait for the deploy to finish. Render displays the public `onrender.com` URL for the website.
+
+Pushes to the connected GitHub branch trigger new deployments. The service uses Render's assigned `PORT` and exposes `/health` for deployment checks.
 
 ## API routes
 
-- `GET /` - simple server status
+- `GET /health` - deployment health check
 - `POST /auth/register` - create a user from `username`, `email`, and `password`
 - `POST /auth/login` - check the submitted email and password
 
